@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bike Rental Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 700px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #343a40;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        label {
+            font-weight: 500;
+        }
+        .prediction-result {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Predict Hourly Bike Rentals</h1>
+
+        <form action="/predict" method="post">
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="yr" class="form-label">Year</label>
+                    <select class="form-select" id="yr" name="yr" required>
+                        <option value="0">2011</option>
+                        <option value="1">2012</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="mnth" class="form-label">Month</label>
+                    <select class="form-select" id="mnth" name="mnth" required>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                 <div class="col-md-6">
+                    <label for="hr" class="form-label">Hour of Day (0-23)</label>
+                    <select class="form-select" id="hr" name="hr" required>
+                        <script>
+                            for(let i=0; i<24; i++) {
+                                document.write(`<option value="${i}">${i}:00</option>`);
+                            }
+                        </script>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="season" class="form-label">Season</label>
+                    <select class="form-select" id="season" name="season" required>
+                        <option value="1">Winter</option>
+                        <option value="2">Spring</option>
+                        <option value="3">Summer</option>
+                        <option value="4">Fall</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="weekday" class="form-label">Day of Week</label>
+                    <select class="form-select" id="weekday" name="weekday" required>
+                        <option value="0">Sunday</option>
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday</option>
+                        <option value="6">Saturday</option>
+                    </select>
+                </div>
+                 <div class="col-md-4">
+                    <label for="workingday" class="form-label">Is it a Working Day?</label>
+                    <select class="form-select" id="workingday" name="workingday" required>
+                        <option value="0">No (Weekend/Holiday)</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="holiday" class="form-label">Is it a Holiday?</label>
+                    <select class="form-select" id="holiday" name="holiday" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                 <div class="col-md-12">
+                    <label for="weathersit" class="form-label">Weather Situation</label>
+                    <select class="form-select" id="weathersit" name="weathersit" required>
+                        <option value="1">Clear / Few clouds</option>
+                        <option value="2">Mist / Cloudy</option>
+                        <option value="3">Light Snow / Light Rain</option>
+                        <option value="4">Heavy Rain / Snow / Fog</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="atemp" class="form-label">Feels Like Temp (°C)</label>
+                    <input type="number" step="any" class="form-control" id="atemp" name="atemp" placeholder="-16 to 50" min="-16" max="50" required>
+                </div>
+                 <div class="col-md-4">
+                    <label for="hum" class="form-label">Humidity (%)</label>
+                    <input type="number" step="any" class="form-control" id="hum" name="hum" placeholder="0 to 100" min="0" max="100" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="windspeed" class="form-label">Windspeed (km/h)</label>
+                    <input type="number" step="any" class="form-control" id="windspeed" name="windspeed" placeholder="0 to 67" min="0" max="80" required>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">Predict Rentals</button>
+            </div>
+        </form>
+
+        {% if prediction_text %}
+        <div class="prediction-result">
+            {{ prediction_text }}
+        </div>
+        {% endif %}
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
